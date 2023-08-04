@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 import {Quote} from "../models/quote.js";
+import {User} from "../models/user.js";
 
 export const insertQuotesList = async (req, res) => {
     try {
@@ -23,8 +24,8 @@ export const insertQuotesList = async (req, res) => {
 
 export const getAllQuotes = async (req, res) => {
     try{
-        const quotes = await Quote.find()
-        res.status(200).json(quotes)
+        const quotes = await User.find()
+        res.status(200).json({message: "OK", code: 200, data: quotes})
     }catch (error) {
         res.status(404).json({message: error.message})
     }

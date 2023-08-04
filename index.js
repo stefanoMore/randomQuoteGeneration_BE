@@ -2,6 +2,8 @@ import express from 'express'
 import mongoose from "mongoose"
 import cors from 'cors'
 import quoteRoutes from './routes/quote.js'
+import authRoutes from './routes/auth.js'
+import cookieParser from 'cookie-parser'
 
 
 const app = express()
@@ -11,7 +13,9 @@ const CONNECTION_URL = 'mongodb://localhost:27017/quotesDB'
 app.use(express.json())
 app.use(cors())
 
+
 app.use('/quote', quoteRoutes)
+app.use('/auth',  authRoutes)
 
 // app.use('/', quotesRoutes)
 
