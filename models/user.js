@@ -1,9 +1,8 @@
-import mongoose, {mongo} from "mongoose";
+import mongoose from 'mongoose';
 import validator from 'validator'
 import bcrypt from 'bcrypt'
 
-
-const userSchema = mongoose.Schema({
+const userSchema =  mongoose.Schema({
     email: {
         type: String,
         required: [true, 'Please Enter an Email'],
@@ -18,6 +17,17 @@ const userSchema = mongoose.Schema({
     }
 })
 
+userSchema.statics.login =  async function(email, password) {
+    const user = await this.findOne({email});
+    if(user){
+        const auth = await bcrypt.compare(password, user.password);
+        if(auth){
+            return user;
+        }
+        throw Error('INCORRECT PASSWORD')
+    }
+    throw Error('INCORRECT EMAIL')
+}
 // fire a function after doc saved to db
 userSchema.post('save', function (doc, next) {
     console.log('NEW USER WAS CREATED AND SAVED', doc)
@@ -30,4 +40,7 @@ userSchema.pre('save', async function (next) {
     this.password = await bcrypt.hash(this.password, salt);
     next();
 })
+
+// static Method to login user
 export const User = mongoose.model('User', userSchema)
+export default User;

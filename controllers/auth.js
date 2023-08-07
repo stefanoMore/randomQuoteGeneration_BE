@@ -1,7 +1,7 @@
 import {User} from "../models/user.js";
-import mongoose from "mongoose";
-import validator from "validator";
 import jwt from 'jsonwebtoken'
+import bcrypt from "bcrypt";
+import {authenticateUser} from "../shared/auth/auth.helper.js";
 
 
 
@@ -20,19 +20,54 @@ const createToken = (id) => {
 }
 
 
-export const registerAccount = async (req, res) => {
+export const loginAccount = async (req, res) => {
     const { email, password } = req.body
     try{
-        const user = await User.create({email, password})
-        const token = createToken(user._id)
-        res.cookie('jwt', token, {httpOnly: true, maxAge: TOKEN_AGE * 1000}) // mando il token al FE, hhtpOnly non può esser cambiato e expire with the age
-        res.status(201).json({user, token: token});
+        const result = await  authenticateUser(email, password);
+        if(result.isSuccess){
+            const token = createToken(result.user._id)
+            res.cookie('jwt', token, {
+                httpOnly: true,
+                // sameSite: 'None',
+                // secure: true,
+                maxAge: TOKEN_AGE * 1000})
+            res.status(201).json({message: result.message});
+        }
+        else{
+            res.status(401).json({message: result.message})
+        }
     }catch (error) {
         handleErrors(error)
         res.status(404).json({message: error.message})
     }
 
 }
+
+export const registerAccount = async (req, res) => {
+    const { email, password } = req.body
+    try{
+       const user = await User.create({email, password})
+        res.status(200).json({message: 'User created Successfully'})
+    }catch (error) {
+        handleErrors(error)
+        res.status(404).json({message: error.message})
+    }
+}
+
+
+export const verifyToken = (req, res) => {
+    const { token } = req.body
+    if(!token){
+        res.status(401).json({isValid: false, message: 'Expired Session'})
+    }
+    try{
+        const payload = jwt.verify(token, SECRET_KEY)
+        res.send({isValid: true, payload: payload})
+    }catch (error) {
+        res.send({isValid: false, message: error.message})
+    }
+}
+
 
 //mongoose Hooks partono quando succede qualcosa al DB
 

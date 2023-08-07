@@ -24,7 +24,7 @@ export const insertQuotesList = async (req, res) => {
 
 export const getAllQuotes = async (req, res) => {
     try{
-        const quotes = await User.find()
+        const quotes = await Quote.find()
         res.status(200).json({message: "OK", code: 200, data: quotes})
     }catch (error) {
         res.status(404).json({message: error.message})

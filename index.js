@@ -11,11 +11,16 @@ const PORT = 3000
 const CONNECTION_URL = 'mongodb://localhost:27017/quotesDB'
 
 app.use(express.json())
-app.use(cors())
+app.use(cookieParser())
+app.use(cors({
+    origin: 'http://localhost:8100',
+    credentials: true
+}))
+ // to save th token nei cookier
 
 
 app.use('/quote', quoteRoutes)
-app.use('/auth',  authRoutes)
+app.use('/',  authRoutes)
 
 // app.use('/', quotesRoutes)
 
