@@ -7,6 +7,7 @@ import {authenticateUser} from "../shared/auth/auth.helper.js";
 
 const SECRET_KEY = "onapinPOIJWFio214389nojansifa";
 const TOKEN_AGE = 3 * 24 * 60 * 60;
+//const TOKEN_AGE = 60;
 
 // handle errors
 const handleErrors = (err) => {
@@ -25,9 +26,9 @@ export const loginAccount = async (req, res) => {
     try{
         const result = await  authenticateUser(email, password);
         if(result.isSuccess){
-            const token = createToken(result.user._id)
+            const token = createToken(result)
             res.cookie('jwt', token, {
-                httpOnly: true,
+                algorithm: 'RS256',
                 // sameSite: 'None',
                 // secure: true,
                 maxAge: TOKEN_AGE * 1000})
@@ -57,15 +58,19 @@ export const registerAccount = async (req, res) => {
 
 export const verifyToken = (req, res) => {
     const { token } = req.body
-    if(!token){
+    if(!!token){
+        console.log('entrato')
+        try{
+            const payload = jwt.verify(token, SECRET_KEY)
+            res.send({isValid: true, payload: payload})
+        }catch (error) {
+            res.send({isValid: false, message: error.message})
+        }
+
+    }else{
         res.status(401).json({isValid: false, message: 'Expired Session'})
     }
-    try{
-        const payload = jwt.verify(token, SECRET_KEY)
-        res.send({isValid: true, payload: payload})
-    }catch (error) {
-        res.send({isValid: false, message: error.message})
-    }
+
 }
 
 
