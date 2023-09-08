@@ -1,13 +1,17 @@
-import {User} from "../models/user.js";
+
 import jwt from 'jsonwebtoken'
-import bcrypt from "bcrypt";
 import {authenticateUser} from "../shared/auth/auth.helper.js";
 
+//mongo user Model
+import {User} from "../models/user.js";
 
+// mongo User Verification Model
+import {UserOTPVerification} from "../models/UserOTPVerification.js"
 
 const SECRET_KEY = "onapinPOIJWFio214389nojansifa";
 const TOKEN_AGE = 3 * 24 * 60 * 60;
 //const TOKEN_AGE = 60;
+
 
 // handle errors
 const handleErrors = (err) => {
@@ -18,6 +22,15 @@ const createToken = (id) => {
     return jwt.sign({ id }, SECRET_KEY, {
         expiresIn: TOKEN_AGE
     } )
+}
+
+const sendVerificationOTP = async () => {
+    try{
+        const otp = `${Math.floor(1000 + Math.random() * 9000)}`
+
+    }catch (error) {
+
+    }
 }
 
 
@@ -44,15 +57,57 @@ export const loginAccount = async (req, res) => {
 
 }
 
-export const registerAccount = async (req, res) => {
-    const { email, password } = req.body
-    try{
-       const user = await User.create({email, password})
-        res.status(200).json({message: 'User created Successfully'})
-    }catch (error) {
-        handleErrors(error)
-        res.status(404).json({message: error.message})
+export const signUp = async (req, res) => {
+    let {name, surname, dateOfBirth,  email, password, } = req.body
+    name = name.trim();
+    surname = surname.trim();
+    dateOfBirth = dateOfBirth.trim();
+    password = password.trim();
+    if(name === "" || email === "" || password === ""){
+        res.json({
+            status: "FAILED",
+            message: "Empty input Field"
+        });
+    }else if(!/^[A-Za-z ]*$/.test(name) || !/^[A-Za-z ]*$/.test(surname)){
+        res.json({
+            status: "FAILED",
+            message: "Invalid name or surname entered"
+        })
     }
+    else{
+        User.find({email})
+            .then(async (result) => {
+                if (result.length) {
+                    res.json({
+                        status: "FAILED",
+                        message: "User with the provided email already exists"
+                    })
+                } else {
+                    try {
+                        const user = await User.create({name, surname, email, password, verified: false })
+                            .then((result) => {
+                                //sendVerificationCode(result, res)
+                                console.log(result,res)
+                            })
+                            .catch((err) => {
+                                console.log(err);
+                                res.json({
+                                    status:"FAILED",
+                                    message: "An error occurred while saving user account!"
+                                });
+                            });
+                        res.status(200).json({
+                            status: "OK",
+                            message: 'User created Successfully'})
+                    } catch (error) {
+                        handleErrors(error)
+                        res.status(404).json({message: error.message})
+                    }
+                }
+            })
+
+    }
+
 }
 
 

@@ -3,6 +3,16 @@ import validator from 'validator'
 import bcrypt from 'bcrypt'
 
 const userSchema =  mongoose.Schema({
+    name: {
+        type: String,
+        required: true,
+        lowercase: true
+    },
+    surname: {
+        type: String,
+        required: true,
+        lowercase: true
+    },
     email: {
         type: String,
         required: [true, 'Please Enter an Email'],
@@ -14,8 +24,16 @@ const userSchema =  mongoose.Schema({
         type: String,
         required: [true, 'Please Enter a Password'],
         minlength: [6,'Min password length is 6 caracter']
+    },
+    dateOfBirth: {
+        type: Date,
+        required: false,
+
+    },
+    verified:{
+        type: Boolean
     }
-})
+}, {timestamps: true})
 
 userSchema.statics.login =  async function(email, password) {
     const user = await this.findOne({email});

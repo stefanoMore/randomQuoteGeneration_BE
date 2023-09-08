@@ -12,7 +12,6 @@ export async function authenticateUser (email, password) {
     if(!auth){
         return {isSuccess: false, message: 'Invalid username or password.'}
     }
-
     return {isSuccess: true, message: 'Account registered successfully', user}
 
 
