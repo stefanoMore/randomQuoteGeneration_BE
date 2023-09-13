@@ -4,6 +4,9 @@ import cors from 'cors'
 import quoteRoutes from './routes/quote.js'
 import authRoutes from './routes/auth.js'
 import cookieParser from 'cookie-parser'
+import configDotenv from 'dotenv'
+
+
 
 
 const app = express()
